@@ -1,0 +1,10 @@
+django
+djangorestframework
+django-filter
+djangorestframework-simplejwt
+drf-nested-routers
+drf-spectacular
+django-cors-headers
+pytest
+pytest-django
+pillow
