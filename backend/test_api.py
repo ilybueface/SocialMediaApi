@@ -1,7 +1,9 @@
 import pytest
-from .models import CustomUser, Post
+from .models import CustomUser, Post, Follow, Story
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils import timezone
+from datetime import timedelta
 
 
 @pytest.mark.django_db
@@ -39,3 +41,89 @@ def test_double_like():
     response_too = client.post(f'/backend/post/{first_post.pk}/like/', format='json')
     assert response_too.status_code == 400
 
+
+@pytest.mark.django_db
+def test_feed_check():
+    user_a = CustomUser.objects.create_user(username='test2', password='test1234')
+    user_b = CustomUser.objects.create_user(username='test', password='test1234')
+    user_c = CustomUser.objects.create_user(username='test1', password='test1234')
+
+    refresh_a = RefreshToken.for_user(user_a)
+    refresh_b = RefreshToken.for_user(user_b)
+    refresh_c = RefreshToken.for_user(user_c)
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_a.access_token))
+
+    follow = Follow.objects.create(follower=user_a, following=user_b)
+    post_a = Post.objects.create(author=user_b)
+    post_b = Post.objects.create(author=user_c)
+
+    response = client.get('/backend/post/', format='json')
+
+    post_ids = []
+    for post in response.data:
+        post_ids.append(post['id'])
+
+    assert post_a.id in post_ids
+    assert post_b.id not in post_ids
+
+
+@pytest.mark.django_db
+def test_count_follow():
+    user_a = CustomUser.objects.create_user(username='testik', password='testik1234')
+    user_b = CustomUser.objects.create_user(username='test', password='tester1234')
+
+    refresh_a = RefreshToken.for_user(user_a)
+    refresh_b = RefreshToken.for_user(user_b)
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_a.access_token))
+
+    follow = Follow.objects.create(follower=user_a, following=user_b)
+
+    response = client.get(f'/backend/user/{user_b.id}/', format='json')
+
+    assert response.data['followers_count'] == 1
+
+
+@pytest.mark.django_db
+def test_pagination_list():
+    user_a = CustomUser.objects.create_user(username='testik', password='testik1234')
+    user_b = CustomUser.objects.create_user(username='test', password='tester1234')
+
+    refresh_a = RefreshToken.for_user(user_a)
+    refresh_b = RefreshToken.for_user(user_b)
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_a.access_token))
+
+    follow = Follow.objects.create(follower=user_a, following=user_b)
+    post_a = Post.objects.create(author=user_b, text='test')
+    post_b = Post.objects.create(author=user_b, text='test')
+    post_c = Post.objects.create(author=user_b, text='test')
+
+    response = client.get('/backend/post/?page_size=2')
+
+    assert len(response.data['results']) == 2
+
+
+@pytest.mark.django_db
+def test_delta_story():
+    user = CustomUser.objects.create_user(username='test', password='test12345')
+
+    refresh = RefreshToken.for_user(user)
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh.access_token))
+
+    story = Story.objects.create(author=user, text='test')
+    old_story = Story.objects.create(author=user, text='tester')
+    old_story.created_at = timezone.now() - timedelta(hours=25)
+    old_story.save()
+
+    response = client.get('/backend/story/')
+    story_ids = [s['id'] for s in response.data]
+
+    assert story.id in story_ids
+    assert old_story.id not in story_ids

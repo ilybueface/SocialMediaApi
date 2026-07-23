@@ -4,11 +4,14 @@ from .models import (
     Post,
     Follow,
     Comment,
+    Story,
 )
 from rest_framework import serializers
 
 
 class CustomSerializers(serializers.ModelSerializer):
+    followers_count = serializers.IntegerField(read_only=True)
+    following_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = CustomUser
@@ -20,12 +23,15 @@ class CustomSerializers(serializers.ModelSerializer):
             'bio',
             'avatar',
             'birth_date',
+            'followers_count',
+            'following_count',
         ]
 
 
 class PostSerializers(serializers.ModelSerializer):
     author = CustomSerializers(read_only=True)
     author_id = serializers.IntegerField(write_only=True, required=False)
+    likes_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Post
@@ -36,11 +42,12 @@ class PostSerializers(serializers.ModelSerializer):
             'text',
             'image',
             'posted_time',
+            'likes_count',
         ]
 
 
 class LikeSerializers(serializers.ModelSerializer):
-    user = serializers.IntegerField(read_only=True)
+    user = serializers.IntegerField(read_only=True, source='user_id')
 
     class Meta:
         model = Like
@@ -53,7 +60,7 @@ class LikeSerializers(serializers.ModelSerializer):
 
 
 class FollowSerializers(serializers.ModelSerializer):
-    follower = serializers.IntegerField(read_only=True)
+    follower = serializers.IntegerField(read_only=True, source='follower_id')
 
     class Meta:
         model = Follow
@@ -65,7 +72,7 @@ class FollowSerializers(serializers.ModelSerializer):
 
 
 class CommentSerializers(serializers.ModelSerializer):
-    user = serializers.IntegerField(read_only=True)
+    user = serializers.IntegerField(read_only=True, source='user_id')
 
     class Meta:
         model = Comment
@@ -74,5 +81,21 @@ class CommentSerializers(serializers.ModelSerializer):
             'user',
             'post',
             'text',
+            'created_at',
+        ]
+
+
+class StorySerializers(serializers.ModelSerializer):
+    author = CustomSerializers(read_only=True)
+    author_id = serializers.IntegerField(write_only=True, required=False)
+
+    class Meta:
+        model = Story
+        fields = [
+            'id',
+            'author',
+            'text',
+            'image',
+            'author_id',
             'created_at',
         ]
