@@ -5,6 +5,7 @@ from .models import (
     Follow,
     Comment,
     Story,
+    Favorite,
 )
 from rest_framework import serializers
 
@@ -88,6 +89,7 @@ class CommentSerializers(serializers.ModelSerializer):
 class StorySerializers(serializers.ModelSerializer):
     author = CustomSerializers(read_only=True)
     author_id = serializers.IntegerField(write_only=True, required=False)
+    view_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Story
@@ -98,4 +100,19 @@ class StorySerializers(serializers.ModelSerializer):
             'image',
             'author_id',
             'created_at',
+            'view_count'
+        ]
+
+
+class FavoriteSerializers(serializers.ModelSerializer):
+    post = PostSerializers(read_only=True)
+    post_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Favorite
+        fields = [
+            'id',
+            'post',
+            'post_id',
+            'added_at',
         ]

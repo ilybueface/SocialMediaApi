@@ -127,3 +127,21 @@ def test_delta_story():
 
     assert story.id in story_ids
     assert old_story.id not in story_ids
+
+
+@pytest.mark.django_db
+def test_permission_list():
+    user_a = CustomUser.objects.create_user(username='testik', password='testik1234')
+    user_b = CustomUser.objects.create_user(username='test', password='tester1234')
+
+    refresh_b = RefreshToken.for_user(user_b)
+
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_b.access_token))
+
+    post = Post.objects.create(author=user_a, text='test1')
+    follow = Follow.objects.create(follower=user_b, following=user_a)
+
+    response = client.delete(f'/backend/post/{post.id}/')
+
+    assert response.status_code == 403

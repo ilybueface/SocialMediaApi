@@ -5,15 +5,23 @@ from .models import (
     Follow,
     Comment,
     Story,
+    StoryView,
+    Favorite,
 )
 from .serializers import (
     CustomSerializers,
     PostSerializers,
     CommentSerializers,
     StorySerializers,
+    FavoriteSerializers,
 )
 from rest_framework.filters import SearchFilter
 from .pagination import CustomPagination
+from .permissions import (
+    IsAuthorOrReadOnly,
+    IsAuthorOrUser,
+    IsSelfOrReadOnly
+)
 from django.db.models import Count
 from rest_framework.decorators import action
 from rest_framework import viewsets
@@ -30,6 +38,7 @@ class PostViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     ordering_fields = ['posted_time', 'likes_count']
     search_fields = ['text', 'author__username']
+    permission_classes = [IsAuthorOrReadOnly]
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
@@ -63,6 +72,7 @@ class PostViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomSerializers
+    permission_classes = [IsSelfOrReadOnly]
 
     @action(detail=True, methods=['post'])
     def follow(self, request, pk=None):
@@ -94,6 +104,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializers
     filterset_fields = ['post']
+    permission_classes = [IsAuthorOrUser]
 
     def get_queryset(self):
         post_pk = self.kwargs.get('post_pk')
@@ -108,10 +119,32 @@ class CommentViewSet(viewsets.ModelViewSet):
 class StoryViewSet(viewsets.ModelViewSet):
     queryset = Story.objects.all()
     serializer_class = StorySerializers
+    permission_classes = [IsAuthorOrReadOnly]
+
+    @action(detail=True, methods=['post'])
+    def story_view(self, request, pk=None):
+        story = self.get_object()
+        user = request.user
+        if StoryView.objects.filter(story=story, user=user).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        StoryView.objects.create(story=story, user=user)
+        return Response(status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
     def get_queryset(self):
         delta = timezone.now() - timedelta(hours=24)
-        return Story.objects.filter(created_at__gte=delta)
+        return (Story.objects.filter(created_at__gte=delta)
+                .annotate(view_count=Count('storyview')))
+
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializers
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
