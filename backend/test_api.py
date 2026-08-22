@@ -14,24 +14,17 @@ def test_backend_post():
 
 
 @pytest.mark.django_db
-def test_post_request():
-    user = CustomUser.objects.create_user(username='test', password='test1234')
-    refresh = RefreshToken.for_user(user)
+def test_post_request(user, auth_client):
+    client = auth_client
 
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh.access_token))
-
-    response = client.post('/backend/post/', {'text': 'Темник'}, format='json')
+    response = client.post('/backend/post/', {'text': 'Темник', 'author_id': user.id}, format='json')
     assert response.status_code == 201
 
 
 @pytest.mark.django_db
-def test_double_like():
-    user = CustomUser.objects.create_user(username='test', password='test1234')
-    refresh = RefreshToken.for_user(user)
+def test_double_like(auth_client, user):
+    client = auth_client
 
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh.access_token))
 
     first_post = Post.objects.create(author=user)
 
@@ -43,17 +36,12 @@ def test_double_like():
 
 
 @pytest.mark.django_db
-def test_feed_check():
-    user_a = CustomUser.objects.create_user(username='test2', password='test1234')
-    user_b = CustomUser.objects.create_user(username='test', password='test1234')
+def test_feed_check(auth_client, user):
+    user_a = user
+    user_b = CustomUser.objects.create_user(username='test12', password='test12234')
     user_c = CustomUser.objects.create_user(username='test1', password='test1234')
 
-    refresh_a = RefreshToken.for_user(user_a)
-    refresh_b = RefreshToken.for_user(user_b)
-    refresh_c = RefreshToken.for_user(user_c)
-
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_a.access_token))
+    client = auth_client
 
     follow = Follow.objects.create(follower=user_a, following=user_b)
     post_a = Post.objects.create(author=user_b)
@@ -62,7 +50,7 @@ def test_feed_check():
     response = client.get('/backend/post/', format='json')
 
     post_ids = []
-    for post in response.data:
+    for post in response.data['results']:
         post_ids.append(post['id'])
 
     assert post_a.id in post_ids
