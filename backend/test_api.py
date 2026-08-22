@@ -1,4 +1,6 @@
 import pytest
+
+from .conftest import second_auth_client
 from .models import CustomUser, Post, Follow, Story
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -58,15 +60,11 @@ def test_feed_check(auth_client, user):
 
 
 @pytest.mark.django_db
-def test_count_follow():
-    user_a = CustomUser.objects.create_user(username='testik', password='testik1234')
-    user_b = CustomUser.objects.create_user(username='test', password='tester1234')
+def test_count_follow(user, auth_client):
+    user_a = user
+    user_b = CustomUser.objects.create_user(username='test123', password='tester1234')
 
-    refresh_a = RefreshToken.for_user(user_a)
-    refresh_b = RefreshToken.for_user(user_b)
-
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_a.access_token))
+    client = auth_client
 
     follow = Follow.objects.create(follower=user_a, following=user_b)
 
@@ -76,15 +74,11 @@ def test_count_follow():
 
 
 @pytest.mark.django_db
-def test_pagination_list():
-    user_a = CustomUser.objects.create_user(username='testik', password='testik1234')
-    user_b = CustomUser.objects.create_user(username='test', password='tester1234')
+def test_pagination_list(user, auth_client):
+    user_a = user
+    user_b = CustomUser.objects.create_user(username='test344', password='tester1234')
 
-    refresh_a = RefreshToken.for_user(user_a)
-    refresh_b = RefreshToken.for_user(user_b)
-
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_a.access_token))
+    client = auth_client
 
     follow = Follow.objects.create(follower=user_a, following=user_b)
     post_a = Post.objects.create(author=user_b, text='test')
@@ -97,13 +91,8 @@ def test_pagination_list():
 
 
 @pytest.mark.django_db
-def test_delta_story():
-    user = CustomUser.objects.create_user(username='test', password='test12345')
-
-    refresh = RefreshToken.for_user(user)
-
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh.access_token))
+def test_delta_story(user, auth_client):
+    client = auth_client
 
     story = Story.objects.create(author=user, text='test')
     old_story = Story.objects.create(author=user, text='tester')
@@ -118,14 +107,11 @@ def test_delta_story():
 
 
 @pytest.mark.django_db
-def test_permission_list():
-    user_a = CustomUser.objects.create_user(username='testik', password='testik1234')
-    user_b = CustomUser.objects.create_user(username='test', password='tester1234')
+def test_permission_list(user, second_user, second_auth_client):
+    user_a = user
+    user_b = second_user
 
-    refresh_b = RefreshToken.for_user(user_b)
-
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(refresh_b.access_token))
+    client = second_auth_client
 
     post = Post.objects.create(author=user_a, text='test1')
     follow = Follow.objects.create(follower=user_b, following=user_a)

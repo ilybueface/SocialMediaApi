@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'backend',
     'rest_framework_simplejwt',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -102,6 +103,12 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Social Media API',
+    'DESCRIPTION': 'API для социальной сети',
+    'VERSION': '1.0.0',
 }
 
 # Password validation

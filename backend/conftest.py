@@ -27,3 +27,16 @@ def auth_super_client(super_user):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {token.access_token}')
     return client
+
+
+@pytest.fixture
+def second_user(db):
+    return CustomUser.objects.create_user(username='test_test', password='test1234')
+
+
+@pytest.fixture
+def second_auth_client(second_user):
+    token = RefreshToken.for_user(second_user)
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f'Bearer {token.access_token}')
+    return client
