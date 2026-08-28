@@ -14,6 +14,11 @@ class Post(models.Model):
     image = models.ImageField(null=True, blank=True, upload_to='posts/')
     posted_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['author', 'posted_time']),
+        ]
+
 
 class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
