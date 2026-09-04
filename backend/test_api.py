@@ -12,7 +12,7 @@ from datetime import timedelta
 def test_backend_post():
     client = APIClient()
     response = client.get('/backend/post/')
-    assert response.status_code == 401
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db

@@ -62,6 +62,8 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     def get_queryset(self):
+        if self.action == 'like' or self.action == 'unlike':
+            return Post.objects.all()
         if not self.request.user.is_authenticated:
             return Post.objects.none()
         following_ids = (Follow.objects.filter(follower=self.request.user)
