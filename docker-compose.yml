@@ -4,6 +4,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - media_data:/app/library/media
 
 
   nginx:
@@ -14,6 +16,7 @@ services:
       - web
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - media_data:/app/library/media
 
   db:
     image: postgres:16
@@ -30,3 +33,4 @@ services:
 
 volumes:
   postgres_data:
+  media_data:
