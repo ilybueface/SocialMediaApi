@@ -9,3 +9,4 @@ pytest
 pytest-django
 pillow
 psycopg2-binary
+gunicorn
