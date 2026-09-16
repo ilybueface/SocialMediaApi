@@ -15,7 +15,6 @@ from .serializers import (
     StorySerializers,
     FavoriteSerializers,
 )
-from rest_framework.filters import SearchFilter
 from .pagination import CustomPagination
 from .permissions import (
     IsAuthorOrReadOnly,
@@ -45,9 +44,13 @@ class PostViewSet(viewsets.ModelViewSet):
         post = self.get_object()
         user = request.user
         if Like.objects.filter(post=post, user=user).exists():
-            return Response('Вы уже лайкнули этот пост', status=status.HTTP_400_BAD_REQUEST)
+            return Response('Вы уже лайкнули этот пост',
+                            status=status.HTTP_400_BAD_REQUEST,
+                            )
         Like.objects.create(post=post, user=user)
-        return Response('Лайк успешно поставлен', status=status.HTTP_201_CREATED)
+        return Response('Лайк успешно поставлен',
+                        status=status.HTTP_201_CREATED,
+                        )
 
     @action(detail=True, methods=['delete'])
     def unlike(self, request, pk=None):
@@ -57,7 +60,6 @@ class PostViewSet(viewsets.ModelViewSet):
         like.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -66,10 +68,15 @@ class PostViewSet(viewsets.ModelViewSet):
             return Post.objects.all()
         if not self.request.user.is_authenticated:
             return Post.objects.none()
-        following_ids = (Follow.objects.filter(follower=self.request.user)
-                        .values_list('following', flat=True))
-        followed_users_posts = (Post.objects.filter(author__in=following_ids)
-                                .annotate(likes_count=Count('like')))
+
+        following_ids = Follow.objects.filter(
+            follower=self.request.user
+        ).values_list('following', flat=True)
+
+        followed_users_posts = Post.objects.filter(
+            author__in=following_ids
+        ).annotate(likes_count=Count('like'))
+
         return followed_users_posts
 
 
@@ -82,8 +89,12 @@ class UserViewSet(viewsets.ModelViewSet):
     def follow(self, request, pk=None):
         following = self.get_object()
         follower = request.user
-        if Follow.objects.filter(follower=follower, following=following).exists():
-            return Response('Вы уже подписаны на данного пользователя', status=status.HTTP_400_BAD_REQUEST)
+        if Follow.objects.filter(follower=follower,
+                                 following=following,
+                                 ).exists():
+            return Response('Вы уже подписаны на данного пользователя',
+                            status=status.HTTP_400_BAD_REQUEST,
+                            )
         if following == follower:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         Follow.objects.create(follower=follower, following=following)
@@ -93,15 +104,18 @@ class UserViewSet(viewsets.ModelViewSet):
     def unfollow(self, request, pk=None):
         following = self.get_object()
         follower = request.user
-        follow = get_object_or_404(Follow, following=following, follower=follower)
+        follow = get_object_or_404(Follow,
+                                   following=following,
+                                   follower=follower,
+                                   )
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
-        return CustomUser.objects.annotate(followers_count=Count('followers'),
-                                    following_count=Count('my_following')
-                                    )
-
+        return CustomUser.objects.annotate(
+            followers_count=Count('followers'),
+            following_count=Count('my_following'),
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):

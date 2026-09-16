@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-from django.conf.global_settings import MEDIA_URL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0irjh=5_u!9z#(lfy_t2f$b$jmqlip2+46ck8n7a+lfl($ai6)'
+SECRET_KEY = \
+    'django-insecure-0irjh=5_u!9z#(lfy_t2f$b$jmqlip2+46ck8n7a+lfl($ai6)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -143,8 +143,6 @@ LOGGING = {
         },
     },
 }
-
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

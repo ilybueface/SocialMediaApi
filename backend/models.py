@@ -30,8 +30,14 @@ class Like(models.Model):
 
 
 class Follow(models.Model):
-    follower = models.ForeignKey(CustomUser, related_name='my_following', on_delete=models.CASCADE)
-    following = models.ForeignKey(CustomUser, related_name='followers', on_delete=models.CASCADE)
+    follower = models.ForeignKey(CustomUser,
+                                 related_name='my_following',
+                                 on_delete=models.CASCADE,
+                                 )
+    following = models.ForeignKey(CustomUser,
+                                  related_name='followers',
+                                  on_delete=models.CASCADE,
+                                  )
 
     class Meta:
         constraints = [

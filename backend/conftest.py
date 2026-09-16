@@ -1,16 +1,21 @@
 import pytest
-from .models import CustomUser, Post, Follow, Story
+from .models import CustomUser
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
 @pytest.fixture
 def user(db):
-    return CustomUser.objects.create_user(username='test', password='test1234')
+    return CustomUser.objects.create_user(username='test',
+                                          password='test1234',
+                                          )
+
 
 @pytest.fixture
 def super_user(db):
-    return CustomUser.objects.create_superuser(username='supertest', password='supertest1234')
+    return CustomUser.objects.create_superuser(username='supertest',
+                                               password='supertest1234',
+                                               )
 
 
 @pytest.fixture
@@ -31,7 +36,9 @@ def auth_super_client(super_user):
 
 @pytest.fixture
 def second_user(db):
-    return CustomUser.objects.create_user(username='test_test', password='test1234')
+    return CustomUser.objects.create_user(username='test_test',
+                                          password='test1234',
+                                          )
 
 
 @pytest.fixture
