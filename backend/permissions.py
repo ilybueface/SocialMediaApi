@@ -13,9 +13,9 @@ class IsAuthorOrUser(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
-        owner = getattr(obj, 'author', None)
+        owner = getattr(obj, "author", None)
         if owner is None:
-            owner = getattr(obj, 'user', None)
+            owner = getattr(obj, "user", None)
         return owner == request.user
 
 

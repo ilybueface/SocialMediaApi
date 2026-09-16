@@ -6,12 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0006_alter_like_created_at'),
+        ("backend", "0006_alter_like_created_at"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='post',
-            index=models.Index(fields=['author', 'posted_time'], name='backend_pos_author__8b6a40_idx'),
+            model_name="post",
+            index=models.Index(
+                fields=["author", "posted_time"], name="backend_pos_author__8b6a40_idx"
+            ),
         ),
     ]

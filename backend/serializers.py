@@ -17,15 +17,15 @@ class CustomSerializers(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'bio',
-            'avatar',
-            'birth_date',
-            'followers_count',
-            'following_count',
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "bio",
+            "avatar",
+            "birth_date",
+            "followers_count",
+            "following_count",
         ]
 
 
@@ -37,52 +37,52 @@ class PostSerializers(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id',
-            'author',
-            'author_id',
-            'text',
-            'image',
-            'posted_time',
-            'likes_count',
+            "id",
+            "author",
+            "author_id",
+            "text",
+            "image",
+            "posted_time",
+            "likes_count",
         ]
 
 
 class LikeSerializers(serializers.ModelSerializer):
-    user = serializers.IntegerField(read_only=True, source='user_id')
+    user = serializers.IntegerField(read_only=True, source="user_id")
 
     class Meta:
         model = Like
         fields = [
-            'id',
-            'post',
-            'user',
-            'created_at',
+            "id",
+            "post",
+            "user",
+            "created_at",
         ]
 
 
 class FollowSerializers(serializers.ModelSerializer):
-    follower = serializers.IntegerField(read_only=True, source='follower_id')
+    follower = serializers.IntegerField(read_only=True, source="follower_id")
 
     class Meta:
         model = Follow
         fields = [
-            'id',
-            'follower',
-            'following',
+            "id",
+            "follower",
+            "following",
         ]
 
 
 class CommentSerializers(serializers.ModelSerializer):
-    user = serializers.IntegerField(read_only=True, source='user_id')
+    user = serializers.IntegerField(read_only=True, source="user_id")
 
     class Meta:
         model = Comment
         fields = [
-            'id',
-            'user',
-            'post',
-            'text',
-            'created_at',
+            "id",
+            "user",
+            "post",
+            "text",
+            "created_at",
         ]
 
 
@@ -94,13 +94,13 @@ class StorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Story
         fields = [
-            'id',
-            'author',
-            'text',
-            'image',
-            'author_id',
-            'created_at',
-            'view_count'
+            "id",
+            "author",
+            "text",
+            "image",
+            "author_id",
+            "created_at",
+            "view_count",
         ]
 
 
@@ -111,8 +111,8 @@ class FavoriteSerializers(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = [
-            'id',
-            'post',
-            'post_id',
-            'added_at',
+            "id",
+            "post",
+            "post_id",
+            "added_at",
         ]

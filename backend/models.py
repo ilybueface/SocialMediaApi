@@ -4,19 +4,19 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     bio = models.TextField(blank=True)
-    avatar = models.ImageField(null=True, blank=True, upload_to='avatars/')
+    avatar = models.ImageField(null=True, blank=True, upload_to="avatars/")
     birth_date = models.DateField(null=True, blank=True)
 
 
 class Post(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField(blank=True)
-    image = models.ImageField(null=True, blank=True, upload_to='posts/')
+    image = models.ImageField(null=True, blank=True, upload_to="posts/")
     posted_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['author', 'posted_time']),
+            models.Index(fields=["author", "posted_time"]),
         ]
 
 
@@ -26,25 +26,26 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
-        unique_together = ('post', 'user')
+        unique_together = ("post", "user")
 
 
 class Follow(models.Model):
-    follower = models.ForeignKey(CustomUser,
-                                 related_name='my_following',
-                                 on_delete=models.CASCADE,
-                                 )
-    following = models.ForeignKey(CustomUser,
-                                  related_name='followers',
-                                  on_delete=models.CASCADE,
-                                  )
+    follower = models.ForeignKey(
+        CustomUser,
+        related_name="my_following",
+        on_delete=models.CASCADE,
+    )
+    following = models.ForeignKey(
+        CustomUser,
+        related_name="followers",
+        on_delete=models.CASCADE,
+    )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['follower', 'following'],
-                name='unique_follow'
-                                    )
+                fields=["follower", "following"], name="unique_follow"
+            )
         ]
 
 
@@ -58,7 +59,7 @@ class Comment(models.Model):
 class Story(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField(blank=True)
-    image = models.ImageField(blank=True, null=True, upload_to='story/')
+    image = models.ImageField(blank=True, null=True, upload_to="story/")
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -68,7 +69,7 @@ class StoryView(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'story')
+        unique_together = ("user", "story")
 
 
 class Favorite(models.Model):
@@ -77,4 +78,4 @@ class Favorite(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('post', 'user')
+        unique_together = ("post", "user")

@@ -7,7 +7,6 @@ from .models import (
     Like,
 )
 
-
 admin.site.register(Post)
 admin.site.register(CustomUser)
 admin.site.register(Follow)
