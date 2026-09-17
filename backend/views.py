@@ -42,8 +42,7 @@ class PostViewSet(viewsets.ModelViewSet):
         liked_post, created = Like.objects.get_or_create(post=post, user=user)
         if not created:
             return Response(
-                "Вы уже ставили лайк на этот пост!",
-                status=status.HTTP_400_BAD_REQUEST
+                "Вы уже ставили лайк на этот пост!", status=status.HTTP_400_BAD_REQUEST
             )
         else:
             return Response(
