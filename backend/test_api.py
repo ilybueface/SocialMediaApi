@@ -132,7 +132,6 @@ def test_permission_list(user, second_user, second_auth_client):
     client = second_auth_client
 
     post = Post.objects.create(author=user_a, text="test1")
-    Follow.objects.create(follower=user_a, following=user_b)
 
     response = client.delete(f"/backend/post/{post.id}/")
 
