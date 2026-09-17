@@ -66,16 +66,14 @@ class PostViewSet(viewsets.ModelViewSet):
             return Post.objects.all()
         if not self.request.user.is_authenticated:
             return Post.objects.none()
-
-        following_ids = Follow.objects.filter(follower=self.request.user).values_list(
-            "following", flat=True
-        )
-
-        followed_users_posts = Post.objects.filter(author__in=following_ids).annotate(
-            likes_count=Count("like")
-        )
-
-        return followed_users_posts
+        if self.action == "list":
+            following_ids = Follow.objects.filter(
+                follower=self.request.user
+            ).values_list("following", flat=True)
+            return Post.objects.filter(author__in=following_ids).annotate(
+                likes_count=Count("like")
+            )
+        return Post.objects.all()
 
 
 class UserViewSet(viewsets.ModelViewSet):
