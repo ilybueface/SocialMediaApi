@@ -125,9 +125,8 @@ def test_delta_story(user, auth_client):
 
 
 @pytest.mark.django_db
-def test_permission_list(user, second_user, second_auth_client):
+def test_permission_list(user, second_auth_client):
     user_a = user
-    user_b = second_user
 
     client = second_auth_client
 
