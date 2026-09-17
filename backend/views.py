@@ -39,16 +39,17 @@ class PostViewSet(viewsets.ModelViewSet):
     def like(self, request, pk=None):
         post = self.get_object()
         user = request.user
-        if Like.objects.filter(post=post, user=user).exists():
+        liked_post, created = Like.objects.get_or_create(post=post, user=user)
+        if not created:
             return Response(
-                "Вы уже лайкнули этот пост",
-                status=status.HTTP_400_BAD_REQUEST,
+                "Вы уже ставили лайк на этот пост!",
+                status=status.HTTP_400_BAD_REQUEST
             )
-        Like.objects.create(post=post, user=user)
-        return Response(
-            "Лайк успешно поставлен",
-            status=status.HTTP_201_CREATED,
-        )
+        else:
+            return Response(
+                "Лайк успешно поставлен",
+                status=status.HTTP_201_CREATED,
+            )
 
     @action(detail=True, methods=["delete"])
     def unlike(self, request, pk=None):

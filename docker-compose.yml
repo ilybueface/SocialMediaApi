@@ -6,6 +6,8 @@ services:
         condition: service_healthy
     volumes:
       - media_data:/app/library/media
+    environment:
+      DB_HOST: db
 
 
   nginx:

@@ -11,15 +11,36 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DB_HOST: localhost
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
       - run: pip install -r requirements.txt
-      - run: pip install black flake8 mypy
+      - run: pip install black flake8
       - run: flake8
       - run: black --check .
       - name: Run pytest
-        continue-on-error: true
         run: pytest
+
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: social_media_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d social_media_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
