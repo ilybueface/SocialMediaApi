@@ -21,13 +21,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-0irjh=5_u!9z#(lfy_t2f$b$jmqlip2+46ck8n7a+lfl($ai6)"
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["web", "localhost"]
 
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+]
 
 # Application definition
 
@@ -42,6 +45,7 @@ INSTALLED_APPS = [
     "backend",
     "rest_framework_simplejwt",
     "drf_spectacular",
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 AUTH_USER_MODEL = "backend.CustomUser"
@@ -81,12 +86,12 @@ WSGI_APPLICATION = "library.library.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "social_media_db",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
+        "ENGINE": os.environ["POSTGRES_ENGINE"],
+        "NAME": os.environ["POSTGRES_DB"],
+        "USER": os.environ["POSTGRES_USER"],
+        "PASSWORD": os.environ["POSTGRES_PASSWORD"],
         "HOST": os.environ.get("DB_HOST", "db"),
-        "PORT": "5432",
+        "PORT": os.environ["POSTGRES_PORT"]
     }
 }
 

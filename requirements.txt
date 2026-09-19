@@ -4,9 +4,9 @@ django-filter
 djangorestframework-simplejwt
 drf-nested-routers
 drf-spectacular
-django-cors-headers
 pytest
 pytest-django
 pillow
 psycopg2-binary
 gunicorn
+django-cors-headers
