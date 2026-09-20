@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["web", "localhost", "'31.57.44.178'"]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:8000',
+    "http://127.0.0.1:8000",
 ]
 
 # Application definition
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "backend",
     "rest_framework_simplejwt",
     "drf_spectacular",
-    'corsheaders',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -56,7 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 AUTH_USER_MODEL = "backend.CustomUser"
@@ -91,7 +91,7 @@ DATABASES = {
         "USER": os.environ["POSTGRES_USER"],
         "PASSWORD": os.environ["POSTGRES_PASSWORD"],
         "HOST": os.environ.get("DB_HOST", "db"),
-        "PORT": os.environ["POSTGRES_PORT"]
+        "PORT": os.environ["POSTGRES_PORT"],
     }
 }
 
