@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DB_HOST: localhost
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_ENGINE: ${{ secrets.POSTGRES_ENGINE }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
