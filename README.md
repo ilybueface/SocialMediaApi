@@ -1,6 +1,9 @@
 # Social Media API
 
 
+[![Tests](https://github.com/ilybueface/SocialMediaApi/actions/workflows/demo.yml/badge.svg?branch=main)](https://github.com/ilybueface/SocialMediaApi/actions/workflows/demo.yml)
+
+
 REST API for a social media platform built with Django REST Framework.
 
 Users can view and share posts, subscribe to each other, share stories and like posts
