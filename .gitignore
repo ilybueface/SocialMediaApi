@@ -1,4 +1,3 @@
-# Created by https://www.gitignore.io
 .idea/
 
 
@@ -90,3 +89,7 @@ local_settings.py
 
 .env
 db.sqlite3
+
+.venv/
+media/*
+!media/.gitkeep
