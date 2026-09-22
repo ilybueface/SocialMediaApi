@@ -48,5 +48,6 @@ jobs:
           script: |
             cd ~/SocialMediaApi
             echo "$GH_TOKEN" | docker login ghcr.io -u $GH_ACTOR  --password-stdin
+            git pull
             docker pull ghcr.io/ilybueface/socialmediaapi:latest
             docker compose -f docker-compose.prod.yml up -d --force-recreate web
