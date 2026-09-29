@@ -3,4 +3,4 @@ WORKDIR /app
 COPY requirements-tg.txt .
 RUN pip install -r requirements-tg.txt
 COPY . .
-CMD ["python", "telegram_bot/bot.py"]
+CMD ["python", "bot.py"]
