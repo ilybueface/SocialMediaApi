@@ -35,6 +35,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  bot:
+    build: telegram_bot/
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   media_data:
