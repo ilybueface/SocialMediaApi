@@ -17,6 +17,9 @@ The API supports pagination, filtering, and sorting for all list endpoints
 - Python
 - Django 5.x
 - Django REST Framework
+- Nginx
+- GitHub Actions
+- Aiogram
 - PostgreSQL
 - Docker + Docker compose
 - pytest
