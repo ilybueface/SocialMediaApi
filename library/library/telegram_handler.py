@@ -16,7 +16,8 @@ class TelegramLogHandler(logging.Handler):
 
     def emit(self, record):
         self.bot = Bot(
-            token=os.getenv("TELEGRAMM_KEY"), default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN)
+            token=os.getenv("TELEGRAMM_KEY"),
+            default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN),
         )
         message = self.format(record)
         asyncio.run(self.bot.send_message(chat_id=self.chat_id, text=message))
