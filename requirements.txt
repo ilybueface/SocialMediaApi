@@ -10,3 +10,5 @@ pillow
 psycopg2-binary
 gunicorn
 django-cors-headers
+python-dotenv
+aiogram
