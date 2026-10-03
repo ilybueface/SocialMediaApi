@@ -12,12 +12,11 @@ load_dotenv()
 class TelegramLogHandler(logging.Handler):
     def __init__(self, chat_id):
         super().__init__()
-        tg_token = os.getenv("TELEGRAMM_KEY")
         self.chat_id = chat_id
-        self.bot = Bot(
-            token=tg_token, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN)
-        )
 
     def emit(self, record):
+        self.bot = Bot(
+            token=os.getenv("TELEGRAMM_KEY"), default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN)
+        )
         message = self.format(record)
         asyncio.run(self.bot.send_message(chat_id=self.chat_id, text=message))
