@@ -1,4 +1,5 @@
 import os
+import docker
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -14,7 +15,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("TELEGRAMM_KEY")
 ADMIN_ID = int(os.getenv("TELEGRAMM_CHAT_ID"))
-
+docker_client = docker.from_env(timeout=10)
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 
 dp = Dispatcher()
@@ -55,12 +56,37 @@ async def help_message(
     message: Message,
 ):
     text = (
-        "❓ *Справка по боту*\n\n"
-        "/start — Перезапустить бота\n"
-        "/profile — Посмотреть личный кабинет\n"
+        "❓ *Bot help*\n\n"
+        "/start — restart the bot\n"
+        "/status — check status of containers\n"
     )
 
     await message.answer(text, parse_mode=ParseMode.MARKDOWN)
+
+
+@dp.message(Command("status"))
+async def get_docker_status(message: Message):
+    containers = docker_client.containers.list(all=True)
+    if not containers:
+        await message.answer(" ❌ *No containers found*")
+        return
+
+    text = "*Docker Containers Status:*\n\n"
+
+    for container in containers:
+        if container.status == "running":
+            status_emoji = "🟢 running"
+        elif container.status == "exited":
+            status_emoji = "🔴 exited"
+        elif container.status == "paused":
+            status_emoji = "🟡 paused"
+        else:
+            status_emoji = f"⚪ {container.status}"
+
+        safe_name = container.name.replace("_", "\\_")
+        text += f" *{safe_name}* - {status_emoji}\n"
+
+    await message.answer(text)
 
 
 async def main():
