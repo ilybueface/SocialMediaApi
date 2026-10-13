@@ -10,10 +10,12 @@ services:
       - media_data:/app/library/media
     environment:
       DB_HOST: db
+      CELERY_BROKER: redis://redis:6379/0
+      CELERY_BACKEND: redis://redis:6379/0
 
 
   nginx:
-    image: nginx:1.31
+    image: nginx:1.27-alpine
     ports:
       - '80:80'
     depends_on:
@@ -45,6 +47,12 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  redis:
+    image: redis:7.2-alpine
+    volumes:
+      - redis_data:/data
+
 volumes:
   postgres_data:
   media_data:
+  redis_data:
