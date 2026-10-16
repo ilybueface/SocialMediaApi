@@ -1,4 +1,5 @@
 import pytest
+import os
 from .models import CustomUser
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -50,3 +51,14 @@ def second_auth_client(second_user):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {token.access_token}")
     return client
+
+
+@pytest.fixture(autouse=True)
+def force_eager_celery(settings):
+    """
+    This fixture will run automatically before EVERY test.
+    It switches Celery to synchronous mode, eliminating the need for Redis.
+    """
+    settings.CELERY_TASK_ALWAYS_EAGER = True
+    settings.CELERY_TASK_EAGER_PROPAGATES = True
+
