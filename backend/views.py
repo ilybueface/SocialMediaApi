@@ -25,6 +25,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
+from .tasks import send_user_notification
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -59,7 +60,10 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        post = serializer.save(author=self.request.user)
+        send_user_notification.delay(
+            author_id=post.author.id, text=f"You have successfully sent the message"
+        )
 
     def get_queryset(self):
         if self.action == "like" or self.action == "unlike":
