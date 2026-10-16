@@ -62,7 +62,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         post = serializer.save(author=self.request.user)
         send_user_notification.delay(
-            author_id=post.author.id, text=f"You have successfully sent the message"
+            author_id=post.author.id, text="You have successfully sent the message"
         )
 
     def get_queryset(self):
