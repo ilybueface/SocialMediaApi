@@ -62,6 +62,9 @@ class Story(models.Model):
     image = models.ImageField(blank=True, null=True, upload_to="story/")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('story', 'user')
+
 
 class StoryView(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

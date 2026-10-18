@@ -29,12 +29,12 @@ from .tasks import send_user_notification
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().select_related('author')
     serializer_class = PostSerializers
     pagination_class = CustomPagination
     ordering_fields = ["posted_time", "likes_count"]
     search_fields = ["text", "author__username"]
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrUser]
 
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
@@ -43,11 +43,11 @@ class PostViewSet(viewsets.ModelViewSet):
         liked_post, created = Like.objects.get_or_create(post=post, user=user)
         if not created:
             return Response(
-                "Вы уже ставили лайк на этот пост!", status=status.HTTP_400_BAD_REQUEST
+                "You have already liked this post!", status=status.HTTP_400_BAD_REQUEST
             )
         else:
             return Response(
-                "Лайк успешно поставлен",
+                "Like successfully added",
                 status=status.HTTP_201_CREATED,
             )
 
@@ -94,7 +94,7 @@ class UserViewSet(viewsets.ModelViewSet):
             following=following,
         ).exists():
             return Response(
-                "Вы уже подписаны на данного пользователя",
+                "You are already subscribed to this user!",
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if following == follower:
@@ -122,7 +122,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().select_related('author')
     serializer_class = CommentSerializers
     filterset_fields = ["post"]
     permission_classes = [IsAuthorOrUser]
@@ -138,7 +138,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class StoryViewSet(viewsets.ModelViewSet):
-    queryset = Story.objects.all()
+    queryset = Story.objects.all().select_related('author')
     serializer_class = StorySerializers
     permission_classes = [IsAuthorOrReadOnly]
 
@@ -156,9 +156,11 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         delta = timezone.now() - timedelta(hours=24)
-        return Story.objects.filter(created_at__gte=delta).annotate(
-            view_count=Count("storyview")
-        )
+        return (Story.objects.filter(
+            created_at__gte=delta)
+            .select_related('author')
+            .annotate(view_count=Count("storyview")
+        ))
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
