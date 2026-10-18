@@ -22,6 +22,8 @@ The API supports pagination, filtering, and sorting for all list endpoints
 - Aiogram 3.x
 - PostgreSQL
 - Docker + Docker compose
+- Redis
+- Celery
 - pytest
 - JWT (djangorestframework-simplejwt)
 
