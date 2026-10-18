@@ -29,7 +29,7 @@ from .tasks import send_user_notification
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().select_related('author')
+    queryset = Post.objects.all().select_related("author")
     serializer_class = PostSerializers
     pagination_class = CustomPagination
     ordering_fields = ["posted_time", "likes_count"]
@@ -122,7 +122,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().select_related('author')
+    queryset = Comment.objects.all().select_related("author")
     serializer_class = CommentSerializers
     filterset_fields = ["post"]
     permission_classes = [IsAuthorOrUser]
@@ -138,7 +138,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class StoryViewSet(viewsets.ModelViewSet):
-    queryset = Story.objects.all().select_related('author')
+    queryset = Story.objects.all().select_related("author")
     serializer_class = StorySerializers
     permission_classes = [IsAuthorOrReadOnly]
 
@@ -156,11 +156,11 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         delta = timezone.now() - timedelta(hours=24)
-        return (Story.objects.filter(
-            created_at__gte=delta)
-            .select_related('author')
-            .annotate(view_count=Count("storyview")
-        ))
+        return (
+            Story.objects.filter(created_at__gte=delta)
+            .select_related("author")
+            .annotate(view_count=Count("storyview"))
+        )
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):

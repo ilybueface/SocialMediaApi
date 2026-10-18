@@ -63,7 +63,7 @@ class Story(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('story', 'user')
+        unique_together = ("story", "user")
 
 
 class StoryView(models.Model):
