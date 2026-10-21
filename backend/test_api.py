@@ -18,7 +18,7 @@ def test_post_request(user, auth_client):
 
     response = client.post(
         "/backend/post/",
-        {"text": "Темник", "author_id": user.id},
+        {"text": "Temnik", "author_id": user.id},
         format="json",
     )
     assert response.status_code == 201

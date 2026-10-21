@@ -17,6 +17,7 @@ from .serializers import (
 )
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly, IsAuthorOrUser, IsSelfOrReadOnly
+from django.db import transaction
 from django.db.models import Count
 from rest_framework.decorators import action
 from rest_framework import viewsets
@@ -61,8 +62,15 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         post = serializer.save(author=self.request.user)
-        send_user_notification.delay(
-            author_id=post.author.id, text="You have successfully sent the message"
+
+        notification_text = (
+            f"Your post '{post.text[:10]}...' has been successfully published!"
+        )
+
+        transaction.on_commit(
+            lambda: send_user_notification.apply_async(
+                args=[post.author.id, notification_text], countdown=10
+            )
         )
 
     def get_queryset(self):
@@ -100,7 +108,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if following == follower:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         Follow.objects.create(follower=follower, following=following)
-        return Response("Успешно", status=status.HTTP_201_CREATED)
+        return Response("Successful", status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["delete"])
     def unfollow(self, request, pk=None):
@@ -122,7 +130,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().select_related("author")
+    queryset = Comment.objects.all().select_related("user")
     serializer_class = CommentSerializers
     filterset_fields = ["post"]
     permission_classes = [IsAuthorOrUser]
