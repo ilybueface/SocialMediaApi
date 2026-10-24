@@ -54,6 +54,7 @@ services:
 
   celery_worker:
     build: .
+    user: "1000:1000"
     command: celery -A library.library.celery_app worker --loglevel=info
     volumes:
       - .:/app
