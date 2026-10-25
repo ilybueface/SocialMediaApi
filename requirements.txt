@@ -15,4 +15,5 @@ aiogram
 docker
 celery==5.4.0
 redis==5.2.1
+requests
 
