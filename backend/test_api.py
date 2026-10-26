@@ -3,6 +3,7 @@ from .models import CustomUser, Post, Follow, Story
 from rest_framework.test import APIClient
 from django.utils import timezone
 from datetime import timedelta
+from django.urls import reverse
 
 
 @pytest.mark.django_db
@@ -135,3 +136,13 @@ def test_permission_list(user, second_auth_client):
     response = client.delete(f"/backend/post/{post.id}/")
 
     assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_post_without_token():
+    client = APIClient()
+    url = reverse("Post-list")
+    data = {"text": "test123238"}
+
+    response = client.post(url, data=data)
+    assert response.status_code == 401
