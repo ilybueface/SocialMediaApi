@@ -7,10 +7,10 @@ from django.urls import reverse
 
 
 @pytest.mark.django_db
-def test_backend_post():
+def test_backend_post_without_token():
     client = APIClient()
     response = client.get("/backend/post/")
-    assert response.status_code == 200
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db
