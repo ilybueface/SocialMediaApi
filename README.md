@@ -1,8 +1,7 @@
 # Social Media API
 
 
-[![Tests](https://github.com/ilybueface/SocialMediaApi/actions/workflows/demo.yml/badge.svg)](https://github.com/ilybueface/SocialMediaApi/actions/workflows/demo.yml)
-
+[![Deploy](https://github.com/ilybueface/SocialMediaApi/actions/workflows/deploy.yml/badge.svg)](https://github.com/ilybueface/SocialMediaApi/actions/workflows/deploy.yml)
 
 REST API for a social media platform built with Django REST Framework.
 
