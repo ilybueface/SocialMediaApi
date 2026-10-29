@@ -16,6 +16,7 @@ from .serializers import (
     FavoriteSerializers,
 )
 from .pagination import CustomPagination
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .permissions import IsAuthorOrReadOnly, IsAuthorOrUser, IsSelfOrReadOnly
 from django.db import transaction
 from django.db.models import Count
@@ -35,7 +36,7 @@ class PostViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     ordering_fields = ["posted_time", "likes_count"]
     search_fields = ["text", "author__username"]
-    permission_classes = [IsAuthorOrUser]
+    permission_classes = [IsAuthenticated, IsAuthorOrUser]
 
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
@@ -91,7 +92,7 @@ class PostViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomSerializers
-    permission_classes = [IsSelfOrReadOnly]
+    permission_classes = []
 
     @action(detail=True, methods=["post"])
     def follow(self, request, pk=None):
@@ -128,12 +129,17 @@ class UserViewSet(viewsets.ModelViewSet):
             following_count=Count("my_following"),
         )
 
+    def get_permissions(self):
+        if self.action == "create":
+            return [AllowAny()]
+        return [IsAuthenticated(), IsSelfOrReadOnly()]
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().select_related("user")
     serializer_class = CommentSerializers
     filterset_fields = ["post"]
-    permission_classes = [IsAuthorOrUser]
+    permission_classes = [IsAuthenticated, IsAuthorOrUser]
 
     def get_queryset(self):
         post_pk = self.kwargs.get("post_pk")
@@ -148,7 +154,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class StoryViewSet(viewsets.ModelViewSet):
     queryset = Story.objects.all().select_related("author")
     serializer_class = StorySerializers
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
     @action(detail=True, methods=["post"])
     def story_view(self, request, pk=None):
