@@ -2,3 +2,5 @@
 
 exclude = .venv,migrations
 max-line-length = 99
+per-file-ignores =
+    ./library/library/settings_test.py: F403, F405
