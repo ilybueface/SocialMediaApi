@@ -17,7 +17,7 @@ from .serializers import (
 )
 from .pagination import CustomPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .permissions import IsAuthorOrReadOnly, IsAuthorOrUser, IsSelfOrReadOnly
+from .permissions import IsAuthorOrUser, IsSelfOrReadOnly
 from django.db import transaction
 from django.db.models import Count
 from rest_framework.decorators import action
@@ -26,6 +26,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from datetime import timedelta
 from .tasks import send_user_notification
 
@@ -36,8 +37,17 @@ class PostViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     ordering_fields = ["posted_time", "likes_count"]
     search_fields = ["text", "author__username"]
-    permission_classes = [IsAuthenticated, IsAuthorOrUser]
+    permission_classes = []
 
+    @extend_schema(
+        request=None,
+        responses={
+            201: OpenApiResponse(response=str, description="Like successfully added"),
+            400: OpenApiResponse(
+                response=str, description="User has already liked this post"
+            ),
+        },
+    )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
         post = self.get_object()
@@ -45,7 +55,7 @@ class PostViewSet(viewsets.ModelViewSet):
         liked_post, created = Like.objects.get_or_create(post=post, user=user)
         if not created:
             return Response(
-                "You have already liked this post!", status=status.HTTP_400_BAD_REQUEST
+                "You have already liked this post", status=status.HTTP_400_BAD_REQUEST
             )
         else:
             return Response(
@@ -53,6 +63,15 @@ class PostViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_201_CREATED,
             )
 
+    @extend_schema(
+        request=None,
+        responses={
+            204: OpenApiResponse(description="Like successfully removed"),
+            404: OpenApiResponse(
+                description="Like not found (post does not exist or user has not liked it)"
+            ),
+        },
+    )
     @action(detail=True, methods=["delete"])
     def unlike(self, request, pk=None):
         post = self.get_object()
@@ -65,7 +84,7 @@ class PostViewSet(viewsets.ModelViewSet):
         post = serializer.save(author=self.request.user)
 
         notification_text = (
-            f"Your post '{post.text[:10]}...' has been successfully published!"
+            f"Your post '{post.text[:10]}...' has been successfully published"
         )
 
         transaction.on_commit(
@@ -88,12 +107,34 @@ class PostViewSet(viewsets.ModelViewSet):
             )
         return Post.objects.all()
 
+    def get_permissions(self):
+        if self.action in ["like", "unlike"]:
+            return [IsAuthenticated()]
+        if self.action == "create":
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsAuthorOrUser()]
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomSerializers
     permission_classes = []
 
+    @extend_schema(
+        request=None,
+        responses={
+            201: OpenApiResponse(
+                response=str, description="Successfully subscribed to user"
+            ),
+            400: OpenApiResponse(
+                response=str,
+                description="Validation error: subscribing to oneself or subscribing again",
+            ),
+            404: OpenApiResponse(
+                description="The user you are trying to follow could not be found"
+            ),
+        },
+    )
     @action(detail=True, methods=["post"])
     def follow(self, request, pk=None):
         following = self.get_object()
@@ -103,7 +144,7 @@ class UserViewSet(viewsets.ModelViewSet):
             following=following,
         ).exists():
             return Response(
-                "You are already subscribed to this user!",
+                "You are already subscribed to this user",
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if following == follower:
@@ -111,6 +152,17 @@ class UserViewSet(viewsets.ModelViewSet):
         Follow.objects.create(follower=follower, following=following)
         return Response("Successful", status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Unsubscription successful, response body is empty"
+            ),
+            404: OpenApiResponse(
+                description="User not found OR you were not following them"
+            ),
+        },
+    )
     @action(detail=True, methods=["delete"])
     def unfollow(self, request, pk=None):
         following = self.get_object()
@@ -130,6 +182,8 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
+        if self.action in ["follow", "unfollow"]:
+            return [IsAuthenticated()]
         if self.action == "create":
             return [AllowAny()]
         return [IsAuthenticated(), IsSelfOrReadOnly()]
@@ -154,8 +208,22 @@ class CommentViewSet(viewsets.ModelViewSet):
 class StoryViewSet(viewsets.ModelViewSet):
     queryset = Story.objects.all().select_related("author")
     serializer_class = StorySerializers
-    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+    permission_classes = []
 
+    @extend_schema(
+        request=None,
+        responses={
+            201: OpenApiResponse(
+                description="View successfully recorded, response body is empty"
+            ),
+            400: OpenApiResponse(
+                description="Error: the user has already viewed this story previously"
+            ),
+            404: OpenApiResponse(
+                description="The story with the specified ID was not found"
+            ),
+        },
+    )
     @action(detail=True, methods=["post"])
     def story_view(self, request, pk=None):
         story = self.get_object()
@@ -175,6 +243,13 @@ class StoryViewSet(viewsets.ModelViewSet):
             .select_related("author")
             .annotate(view_count=Count("storyview"))
         )
+
+    def get_permissions(self):
+        if self.action == "story_view":
+            return [IsAuthenticated()]
+        if self.action == "create":
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsAuthorOrUser()]
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
