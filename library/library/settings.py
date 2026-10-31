@@ -27,11 +27,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG') == ("True")
+DEBUG = os.getenv("DEBUG") == ("True")
 
-raw_hosts = os.getenv('ALLOWED_HOSTS', '')
+raw_hosts = os.getenv("ALLOWED_HOSTS", "")
 
-ALLOWED_HOSTS = raw_hosts.split(',')
+ALLOWED_HOSTS = raw_hosts.split(",")
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
