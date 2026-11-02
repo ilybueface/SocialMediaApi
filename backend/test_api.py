@@ -1,5 +1,5 @@
 import pytest
-from .models import CustomUser, Post, Follow, Story
+from .models import CustomUser, Post, Follow, Story, Like
 from rest_framework.test import APIClient
 from django.utils import timezone
 from datetime import timedelta
@@ -146,3 +146,62 @@ def test_post_without_token():
 
     response = client.post(url, data=data)
     assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_second_user_likes_and_creates_like_in_db(
+    user, second_user, second_auth_client
+):
+    post = Post.objects.create(author=user, text="test_like")
+
+    response = second_auth_client.post(
+        f"/backend/post/{post.pk}/like/",
+        format="json",
+    )
+
+    assert response.status_code == 201
+    assert Like.objects.filter(post=post, user=second_user).exists()
+
+
+@pytest.mark.django_db
+def test_create_post_prevent_author_spoofing(user, second_user, auth_client):
+    client = auth_client
+
+    response = client.post(
+        "/backend/post/",
+        {"text": "Tema", "author_id": second_user.id},
+        format="json",
+    )
+
+    assert response.status_code == 201
+    assert response.data["author"]["id"] == user.id
+    assert response.data["author"]["id"] != second_user.id
+
+    created_post_id = response.data["id"]
+
+    db_post = Post.objects.get(id=created_post_id)
+
+    assert db_post.author == user
+    assert db_post.author != second_user
+
+
+@pytest.mark.django_db
+def test_create_story_prevent_author_spoofing(user, second_user, auth_client):
+    client = auth_client
+
+    response = client.post(
+        "/backend/story/",
+        {"text": "Temachka", "author_id": second_user.id},
+        format="json",
+    )
+
+    assert response.status_code == 201
+    assert response.data["author"]["id"] == user.id
+    assert response.data["author"]["id"] != second_user.id
+
+    created_story_id = response.data["id"]
+
+    db_story = Story.objects.get(id=created_story_id)
+
+    assert db_story.author == user
+    assert db_story.author != second_user

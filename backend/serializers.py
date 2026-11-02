@@ -31,7 +31,7 @@ class CustomSerializers(serializers.ModelSerializer):
 
 class PostSerializers(serializers.ModelSerializer):
     author = CustomSerializers(read_only=True)
-    author_id = serializers.IntegerField(write_only=True, required=False)
+    author_id = serializers.IntegerField(read_only=True, required=False)
     likes_count = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -88,7 +88,7 @@ class CommentSerializers(serializers.ModelSerializer):
 
 class StorySerializers(serializers.ModelSerializer):
     author = CustomSerializers(read_only=True)
-    author_id = serializers.IntegerField(write_only=True, required=False)
+    author_id = serializers.IntegerField(read_only=True, required=False)
     view_count = serializers.IntegerField(read_only=True)
 
     class Meta:
