@@ -113,7 +113,7 @@ When a user publishes a post, **the web server immediately returns a success res
 
 ### Why is it designed this way?
 * **Instant Response (UI/UX):** Outbound network requests introduce unpredictable latency. Moving this logic out of the request-response cycle ensures the user never experiences frozen screens.
-* **Production-Ready Retry Strategy:** Currently, the task simulates the delivery by logging it to the console. However, the error-handling configuration-including `autoretry_for=(ConnectionError, Timeout)`, a limit of 20 retries, and an exponential backoff capped at 30 seconds-is intentionally pre-configured for a future production upgrade to a real HTTP request (e.g., integration with an external SMS or Email gateway).
+* **Production-Ready Retry Strategy:** Currently, the task simulates the delivery by logging it to the console. However, the error-handling configuration-! including `autoretry_for=(ConnectionError, Timeout)`, a limit of 20 retries, and an exponential backoff capped at 30 seconds-is intentionally pre-configured for a future production upgrade to a real HTTP request (e.g., integration with an external SMS or Email gateway).
 * **Database State Safety:** Tasks are dispatched strictly using `transaction.on_commit`. This guarantees that the notification message is sent to the broker only *after* the Django database transaction is successfully committed. Without this, a fast Celery worker could try to fetch a post that does not yet exist in the database.
 * **Production-Ready Security:** For security reasons, the Celery worker process runs as a non-root user within the container environment to mitigate privilege escalation risks.
 
