@@ -24,6 +24,7 @@ class TelegramLogHandler(logging.Handler):
         message = self.format(record)
         safe_message = html.escape(message)
         truncated_message = safe_message[-4096:]
+
         def run_async():
             asyncio.run(
                 self.bot.send_message(chat_id=self.chat_id, text=truncated_message)
