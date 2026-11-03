@@ -14,7 +14,7 @@ The API supports pagination, filtering, and sorting for all list endpoints
 ## Tech stack
 
 - Python
-- Django 5.x
+- Django 6.x
 - Django REST Framework
 - Nginx
 - GitHub Actions
@@ -58,6 +58,8 @@ POSTGRES_PORT=...
 SECRET_KEY=...
 TELEGRAMM_KEY=(your telegram token)
 TELEGRAMM_CHAT_ID=(your telegram id)
+ALLOWED_HOSTS=.....
+DEBUG=True or False(choose the mode yourself)
 ```
 
 3. **Build and launch containers**
@@ -102,6 +104,24 @@ The project includes a complete Continuous Integration and Continuous Delivery (
   * `docker-compose.yml` is optimized for local development and testing.
   * `docker-compose.prod.yml` is used for the production server. It is tailored for live deployment, running containers in the background (`-d`), managing the **Nginx** web server, and orchestrating production-ready service communication.
 
+## Celery + Redis
+
+The project is configured for asynchronous notification delivery. Instead of overloading the web server's main thread, operations that don’t need to block the response have been offloaded to dedicated background processes.
+
+### What is happening?
+When a user publishes a post, **the web server immediately returns a success response** without waiting for the notification to be processed. The actual delivery (`send_user_notification`) is pushed to Redis as a background task. The user receives an instant confirmation that their post is published, while a separate Celery worker process handles the simulated notification delivery by logging the message to the console in the background.
+
+### Why is it designed this way?
+* **Instant Response (UI/UX):** Outbound network requests introduce unpredictable latency. Moving this logic out of the request-response cycle ensures the user never experiences frozen screens.
+* **Production-Ready Retry Strategy:** Currently, the task simulates the delivery by logging it to the console. However, the error-handling configuration-including `autoretry_for=(ConnectionError, Timeout)`, a limit of 20 retries, and an exponential backoff capped at 30 seconds-is intentionally pre-configured for a future production upgrade to a real HTTP request (e.g., integration with an external SMS or Email gateway).
+* **Database State Safety:** Tasks are dispatched strictly using `transaction.on_commit`. This guarantees that the notification message is sent to the broker only *after* the Django database transaction is successfully committed. Without this, a fast Celery worker could try to fetch a post that does not yet exist in the database.
+* **Production-Ready Security:** For security reasons, the Celery worker process runs as a non-root user within the container environment to mitigate privilege escalation risks.
+
+### What role does Redis play?
+**Redis acts as the message broker (the task queue).**
+* Django does not execute the `send_user_notification` function code directly. Instead, it serializes the function arguments into a lightweight message and drops it into Redis.
+* The message remains stored safely inside Redis until an available **Celery worker process** fetches it. 
+* *Note on reliability:* Under default Celery settings, tasks are acknowledged immediately upon receipt. This setup specifically protects against web server (Django) crashes while tasks are waiting in the queue, but does not guarantee delivery if the Celery worker process itself is abruptly terminated mid-execution.
 
 
 ## API Endpoints
@@ -117,6 +137,17 @@ The project includes a complete Continuous Integration and Continuous Delivery (
 | DELETE | /backend/user/{id}/unfollow/ | Unfollow a user                      |
 | GET    | /backend/post/{id}/comments/ | Get post comments                    |
 | GET    | /backend/story/              | Active stories                       |
+
+
+## 🚀 API Documentation & Testing
+
+The complete and interactive API documentation is available via Swagger UI once the project is running:
+
+🔗 **[http://localhost:80/api/docs/](http://localhost:80/api/docs/)**
+
+### 🔒 Access & Permissions Note
+* **Without an Authentication Token:** You can only browse the available endpoints, view the API schema, and perform user registration (`/backend/user/`).
+* **For Protected Endpoints:** To test creation, modification, or deletion endpoints directly inside Swagger, you must first register/login, obtain a JWT/Token, and authorize yourself using the **"Authorize"** button at the top of the Swagger page.
 
 
 ## Architecture
